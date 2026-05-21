@@ -1,0 +1,40 @@
+rules:
+  - id: TB001
+    severity: violation
+    rule: "No hardcoded delays (#100, #50 etc.) — use clock-based waiting only"
+
+  - id: TB002
+    severity: violation
+    rule: "Clock must be generated using always block with a parameter for period"
+
+  - id: TB003
+    severity: violation
+    rule: "Reset must be applied for minimum 2 clock cycles at start"
+
+  - id: TB004
+    severity: violation
+    rule: "Stimulus and checker must be separated — no checking logic inside stimulus blocks"
+
+  - id: TB005
+    severity: violation
+    rule: "All inputs must be driven with non-blocking assignments synchronized to clock edge"
+
+  - id: TB006
+    severity: violation
+    rule: "Test must have a timeout watchdog — simulation must not run forever"
+
+  - id: TB007
+    severity: warning
+    rule: "Use $display/$monitor with proper timestamps for debugging"
+
+  - id: TB008
+    severity: warning
+    rule: "File name must follow format: <module_name>_tb.sv"
+
+  - id: TB009
+    severity: warning
+    rule: "TB must cover reset check, basic functional check, and edge cases"
+
+  - id: TB010
+    severity: violation
+    rule: "No $finish without printing a PASS or FAIL message"
