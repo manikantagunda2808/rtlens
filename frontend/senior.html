@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VLSI Review — Senior</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080b12; --surface: #0f1520; --surface2: #161d2e;
+      --border: #1e2a40; --accent: #4f8ef7; --accent2: #7c4dff;
+      --success: #00c896; --warn: #f5a623; --danger: #ff4d6d;
+      --text: #e2e8f0; --muted: #5a6a85;
+      --mono: 'JetBrains Mono', monospace; --sans: 'Syne', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+    .navbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 14px 2rem; display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .navbar-brand { display: flex; align-items: center; gap: 10px; }
+    .logo { font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+    .role-pill {
+      font-size: 10px; padding: 3px 8px; border-radius: 20px;
+      background: rgba(245,166,35,0.15); color: var(--warn);
+      font-family: var(--mono); border: 1px solid rgba(245,166,35,0.3);
+    }
+    .navbar-right { display: flex; align-items: center; gap: 1.5rem; }
+    .user-name { font-size: 13px; color: var(--muted); }
+    .logout-btn { font-size: 12px; color: var(--danger); cursor: pointer; font-family: var(--mono); }
+    .main-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 2rem; }
+    .main-tab {
+      padding: 14px 20px; font-size: 13px; font-weight: 600;
+      cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s;
+    }
+    .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem; }
+    label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 6px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.5px; }
+    select, textarea, input[type="text"] {
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 13px;
+      padding: 10px 12px; outline: none; margin-bottom: 1.2rem; font-family: var(--sans);
+    }
+    select:focus, textarea:focus, input:focus { border-color: var(--accent); }
+    textarea { font-family: var(--mono); resize: vertical; }
+    .btn-primary {
+      padding: 10px 20px; background: var(--accent); color: white;
+      border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-danger {
+      padding: 8px 14px; background: transparent; color: var(--danger);
+      border: 1px solid var(--danger); border-radius: 8px; font-size: 12px; cursor: pointer;
+    }
+    .btn-secondary {
+      padding: 8px 14px; background: transparent; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 8px; font-size: 12px; cursor: pointer; margin-left: 8px;
+    }
+    .stats-row { display: flex; gap: 12px; margin-bottom: 1.5rem; }
+    .stat-card {
+      flex: 1; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem; text-align: center;
+    }
+    .stat-card .num { font-size: 28px; font-weight: 700; color: var(--accent); font-family: var(--mono); }
+    .stat-card .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: var(--mono); text-transform: uppercase; }
+    .history-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 10px;
+    }
+    .history-card .meta { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+    .badge { font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 600; font-family: var(--mono); }
+    .badge.rtl { background: rgba(79,142,247,0.15); color: var(--accent); }
+    .badge.tb { background: rgba(0,200,150,0.15); color: var(--success); }
+    .badge.uvm { background: rgba(124,77,255,0.15); color: #9c8fff; }
+    .badge.mixed { background: rgba(245,166,35,0.15); color: var(--warn); }
+    .junior-name { font-size: 13px; color: var(--text); font-weight: 600; }
+    .date { font-size: 11px; color: var(--muted); margin-left: auto; font-family: var(--mono); }
+    .score-pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; font-family: var(--mono); }
+    .sc-good { background: rgba(0,200,150,0.15); color: var(--success); }
+    .sc-warn { background: rgba(245,166,35,0.15); color: var(--warn); }
+    .sc-bad { background: rgba(255,77,109,0.15); color: var(--danger); }
+    .assignment-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 10px;
+    }
+    .assignment-card .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .aname { font-size: 15px; font-weight: 600; color: var(--text); }
+    .adesc { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 1rem 0 8px; font-family: var(--mono); }
+    .rule-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+    }
+    .rule-id { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 2px 6px; border-radius: 4px; color: var(--accent); flex-shrink: 0; }
+    .rule-text { font-size: 13px; color: var(--text); flex: 1; }
+    .sev-violation { color: var(--danger); font-size: 11px; font-family: var(--mono); flex-shrink: 0; }
+    .sev-warning { color: var(--warn); font-size: 11px; font-family: var(--mono); flex-shrink: 0; }
+    .filter-row { display: flex; gap: 10px; margin-bottom: 1rem; }
+    .filter-row select { margin-bottom: 0; }
+    .loading { color: var(--muted); font-size: 13px; font-family: var(--mono); }
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+      z-index: 100; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; width: 600px;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .modal h3 { font-size: 16px; color: var(--text); margin-bottom: 1rem; font-weight: 700; }
+    .modal-footer { display: flex; gap: 8px; margin-top: 1rem; }
+
+    /* Chat */
+    .chat-container {
+      display: flex; flex-direction: column;
+      height: calc(100vh - 120px); max-width: 800px; margin: 0 auto; padding: 1.5rem;
+    }
+    .suggestions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+    .suggestion-btn {
+      padding: 6px 12px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; font-size: 12px; color: var(--muted); cursor: pointer;
+      font-family: var(--mono); transition: all 0.15s;
+    }
+    .suggestion-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 1rem; }
+    .chat-msg { max-width: 75%; padding: 12px 16px; border-radius: 12px; font-size: 13px; line-height: 1.7; }
+    .chat-msg.user { background: var(--accent2); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-msg.assistant { background: var(--surface); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+    .chat-input-row { display: flex; gap: 10px; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .chat-input-row input {
+      flex: 1; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 14px;
+      padding: 12px 16px; outline: none; font-family: var(--sans);
+    }
+    .chat-input-row input:focus { border-color: var(--accent); }
+    .chat-send { padding: 12px 22px; background: var(--accent); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    code { background: var(--surface2); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 12px; color: #9c8fff; }
+    pre { background: var(--surface2); padding: 12px; border-radius: 8px; font-family: var(--mono); font-size: 12px; overflow-x: auto; margin: 8px 0; border: 1px solid var(--border); color: #a8d8a8; }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-brand">
+    <span class="logo">⚡ VLSI</span>
+    <span class="role-pill">SENIOR</span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-name" id="welcomeMsg"></span>
+    <span class="logout-btn" onclick="logout()">logout →</span>
+  </div>
+</div>
+
+<div class="main-tabs">
+  <div class="main-tab active" onclick="switchMain('reviews')">📊 All Reviews</div>
+  <div class="main-tab" onclick="switchMain('assignments')">📋 Assignments</div>
+  <div class="main-tab" onclick="switchMain('rules')">⚙️ Global Rules</div>
+  <div class="main-tab" onclick="switchMain('chat')">💬 AI Chat</div>
+</div>
+
+<!-- All Reviews -->
+<div class="panel active" id="reviewsPanel">
+  <div class="container">
+    <div class="stats-row">
+      <div class="stat-card"><div class="num" id="statTotal">-</div><div class="lbl">Total Reviews</div></div>
+      <div class="stat-card"><div class="num" id="statAvg">-</div><div class="lbl">Avg Score</div></div>
+      <div class="stat-card"><div class="num" id="statViolations">-</div><div class="lbl">Violations</div></div>
+    </div>
+    <div class="filter-row">
+      <select id="filterType" onchange="filterReviews()">
+        <option value="all">All Types</option>
+        <option value="rtl">RTL</option>
+        <option value="tb">Testbench</option>
+        <option value="uvm">UVM</option>
+        <option value="mixed">Mixed</option>
+      </select>
+    </div>
+    <div id="allReviewsList"><p class="loading">Loading reviews...</p></div>
+  </div>
+</div>
+
+<!-- Assignments -->
+<div class="panel" id="assignmentsPanel">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <span style="font-size:14px;color:var(--muted)">Manage assignments for juniors</span>
+      <button class="btn-primary" onclick="openCreateModal()">+ New Assignment</button>
+    </div>
+    <div id="assignmentsList"><p class="loading">Loading...</p></div>
+  </div>
+</div>
+
+<!-- Global Rules -->
+<div class="panel" id="rulesPanel">
+  <div class="container">
+    <label>Select Rule Type</label>
+    <select id="ruleType" onchange="loadRules()">
+      <option value="rtl">RTL</option>
+      <option value="tb">Testbench</option>
+      <option value="uvm">UVM</option>
+    </select>
+    <div id="rulesList"></div>
+    <div style="margin-top:1.5rem">
+      <div class="section-title">Add New Rule</div>
+      <label>Rule ID</label>
+      <input type="text" id="newRuleId" placeholder="e.g. RTL011">
+      <label>Severity</label>
+      <select id="newSeverity">
+        <option value="violation">Violation</option>
+        <option value="warning">Warning</option>
+      </select>
+      <label>Rule Description</label>
+      <textarea id="newRuleText" style="min-height:80px" placeholder="Describe the rule..."></textarea>
+      <button class="btn-primary" onclick="addRule()">Add Rule</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Chat -->
+<div class="panel" id="chatPanel">
+  <div class="chat-container">
+    <div class="suggestions">
+      <button class="suggestion-btn" onclick="askSuggestion(this)">Explain PCIe LTSSM states</button>
+      <button class="suggestion-btn" onclick="askSuggestion(this)">UVM sequence vs sequencer</button>
+      <button class="suggestion-btn" onclick="askSuggestion(this)">AXI4 vs AXI4-Lite differences</button>
+      <button class="suggestion-btn" onclick="askSuggestion(this)">What causes setup time violation?</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg assistant">
+        👋 Hi! I'm your VLSI assistant. Ask me anything about protocols, verification methodology, RTL design, or code review best practices.
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Ask a VLSI question..." onkeydown="if(event.key==='Enter') sendChat()">
+      <button class="chat-send" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Assignment Modal -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <h3>Create New Assignment</h3>
+    <label>Assignment Name</label>
+    <input type="text" id="aName" placeholder="e.g. Serial Adder — SIPO/PISO">
+    <label>Description</label>
+    <textarea id="aDesc" style="min-height:60px" placeholder="Brief description..."></textarea>
+    <div class="section-title">RTL Specific Rules</div>
+    <div id="aRtlRules"></div>
+    <button class="btn-secondary" onclick="addAssignmentRule('rtl')">+ Add RTL Rule</button>
+    <div class="section-title" style="margin-top:1rem">TB Specific Rules</div>
+    <div id="aTbRules"></div>
+    <button class="btn-secondary" onclick="addAssignmentRule('tb')">+ Add TB Rule</button>
+    <div class="section-title" style="margin-top:1rem">UVM Specific Rules</div>
+    <div id="aUvmRules"></div>
+    <button class="btn-secondary" onclick="addAssignmentRule('uvm')">+ Add UVM Rule</button>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="saveAssignment()">Create Assignment</button>
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "http://127.0.0.1:8000";
+  const token = localStorage.getItem("token");
+  const name = localStorage.getItem("name");
+  const role = localStorage.getItem("role");
+  if (!token || role !== "senior") window.location.href = "/";
+  document.getElementById("welcomeMsg").textContent = name;
+
+  let allReviews = [];
+  let assignmentRules = { rtl: [], tb: [], uvm: [] };
+  let chatHistory = [];
+
+  function logout() { localStorage.clear(); window.location.href = "/"; }
+
+  function switchMain(tab) {
+    const tabs = ["reviews", "assignments", "rules", "chat"];
+    document.querySelectorAll(".main-tab").forEach((t, i) => t.classList.toggle("active", tabs[i] === tab));
+    tabs.forEach(t => document.getElementById(`${t}Panel`).classList.toggle("active", t === tab));
+    if (tab === "assignments") loadAssignments();
+    if (tab === "rules") loadRules();
+  }
+
+  // Reviews
+  async function loadAllReviews() {
+    const res = await fetch(`${API}/history/all`, { headers: { "Authorization": `Bearer ${token}` } });
+    if (res.ok) {
+      allReviews = await res.json();
+      updateStats(allReviews);
+      renderReviews(allReviews);
+    }
+  }
+
+  function updateStats(data) {
+    document.getElementById("statTotal").textContent = data.length;
+    const avg = data.length ? (data.reduce((s, r) => s + r.score, 0) / data.length).toFixed(1) : "-";
+    document.getElementById("statAvg").textContent = avg;
+    document.getElementById("statViolations").textContent = data.reduce((s, r) => s + (r.violations ? r.violations.length : 0), 0);
+  }
+
+  function filterReviews() {
+    const type = document.getElementById("filterType").value;
+    renderReviews(type === "all" ? allReviews : allReviews.filter(r => r.review_type === type));
+  }
+
+  function renderReviews(data) {
+    if (!data.length) { document.getElementById("allReviewsList").innerHTML = "<p class='loading'>No reviews found.</p>"; return; }
+    let html = "";
+    data.forEach(r => {
+      const cls = r.score >= 7 ? "sc-good" : r.score >= 5 ? "sc-warn" : "sc-bad";
+      html += `
+        <div class="history-card">
+          <div class="meta">
+            <span class="junior-name">${r.user_name}</span>
+            <span class="badge ${r.review_type}">${r.review_type.toUpperCase()}</span>
+            <span class="score-pill ${cls}">${r.score}/10</span>
+            <span class="date">${new Date(r.created_at).toLocaleDateString()}</span>
+          </div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${r.summary}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">${r.violations ? r.violations.length : 0} violations · ${r.warnings ? r.warnings.length : 0} warnings</div>
+        </div>`;
+    });
+    document.getElementById("allReviewsList").innerHTML = html;
+  }
+
+  // Assignments
+  async function loadAssignments() {
+    const res = await fetch(`${API}/assignments/`, { headers: { "Authorization": `Bearer ${token}` } });
+    if (res.ok) {
+      const data = await res.json();
+      if (!data.length) { document.getElementById("assignmentsList").innerHTML = "<p class='loading'>No assignments yet.</p>"; return; }
+      let html = "";
+      data.forEach(a => {
+        html += `
+          <div class="assignment-card">
+            <div class="top">
+              <span class="aname">${a.name}</span>
+              <button class="btn-danger" onclick="deleteAssignment('${a.id}')">Delete</button>
+            </div>
+            <div class="adesc">${a.description || "No description"}</div>
+            <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">
+              RTL: ${a.rtl_rules ? a.rtl_rules.length : 0} · TB: ${a.tb_rules ? a.tb_rules.length : 0} · UVM: ${a.uvm_rules ? a.uvm_rules.length : 0} rules
+            </div>
+          </div>`;
+      });
+      document.getElementById("assignmentsList").innerHTML = html;
+    }
+  }
+
+  async function deleteAssignment(id) {
+    if (!confirm("Delete this assignment?")) return;
+    await fetch(`${API}/assignments/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
+    loadAssignments();
+  }
+
+  function openCreateModal() {
+    assignmentRules = { rtl: [], tb: [], uvm: [] };
+    document.getElementById("aName").value = "";
+    document.getElementById("aDesc").value = "";
+    ["Rtl", "Tb", "Uvm"].forEach(t => document.getElementById(`a${t}Rules`).innerHTML = "");
+    document.getElementById("createModal").classList.add("open");
+  }
+
+  function closeModal() { document.getElementById("createModal").classList.remove("open"); }
+
+  function addAssignmentRule(type) {
+    const container = document.getElementById(`a${type.charAt(0).toUpperCase() + type.slice(1)}Rules`);
+    const idx = assignmentRules[type].length;
+    assignmentRules[type].push({ id: "", severity: "violation", rule: "" });
+    const div = document.createElement("div");
+    div.style.cssText = "display:flex;gap:8px;margin-bottom:8px;align-items:flex-start";
+    div.innerHTML = `
+      <input type="text" placeholder="${type.toUpperCase()}A0${idx+1}" style="width:120px;margin-bottom:0" onchange="assignmentRules['${type}'][${idx}].id=this.value">
+      <select style="width:110px;margin-bottom:0" onchange="assignmentRules['${type}'][${idx}].severity=this.value">
+        <option value="violation">Violation</option>
+        <option value="warning">Warning</option>
+      </select>
+      <input type="text" placeholder="Rule description" style="flex:1;margin-bottom:0" onchange="assignmentRules['${type}'][${idx}].rule=this.value">`;
+    container.appendChild(div);
+  }
+
+  async function saveAssignment() {
+    const aName = document.getElementById("aName").value.trim();
+    const desc = document.getElementById("aDesc").value.trim();
+    if (!aName) return alert("Assignment name is required.");
+    const res = await fetch(`${API}/assignments/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({
+        name: aName, description: desc,
+        rtl_rules: assignmentRules.rtl.filter(r => r.id && r.rule),
+        tb_rules: assignmentRules.tb.filter(r => r.id && r.rule),
+        uvm_rules: assignmentRules.uvm.filter(r => r.id && r.rule)
+      })
+    });
+    if (res.ok) { closeModal(); loadAssignments(); }
+    else alert("Failed to create assignment.");
+  }
+
+  // Global Rules
+  async function loadRules() {
+    const type = document.getElementById("ruleType").value;
+    const res = await fetch(`${API}/rules/${type}`);
+    if (res.ok) {
+      const data = await res.json();
+      let html = `<div class="section-title">Current Rules</div>`;
+      data.rules.forEach(r => {
+        html += `
+          <div class="rule-item">
+            <span class="rule-id">${r.id}</span>
+            <span class="rule-text">${r.rule}</span>
+            <span class="sev-${r.severity}">${r.severity}</span>
+          </div>`;
+      });
+      document.getElementById("rulesList").innerHTML = html;
+    }
+  }
+
+  async function addRule() {
+    const type = document.getElementById("ruleType").value;
+    const id = document.getElementById("newRuleId").value.trim();
+    const severity = document.getElementById("newSeverity").value;
+    const rule = document.getElementById("newRuleText").value.trim();
+    if (!id || !rule) return alert("Fill in Rule ID and description.");
+    const getRes = await fetch(`${API}/rules/${type}`);
+    const existing = await getRes.json();
+    existing.rules.push({ id, severity, rule });
+    const res = await fetch(`${API}/rules/${type}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify(existing)
+    });
+    if (res.ok) {
+      document.getElementById("newRuleId").value = "";
+      document.getElementById("newRuleText").value = "";
+      loadRules();
+    }
+  }
+
+  // AI Chat
+  function askSuggestion(btn) {
+    document.getElementById("chatInput").value = btn.textContent;
+    sendChat();
+  }
+
+  async function sendChat() {
+    const input = document.getElementById("chatInput");
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = "";
+    chatHistory.push({ role: "user", content: msg });
+    appendChatMsg("user", msg);
+    appendChatMsg("assistant", "...", "typingMsg");
+
+    const res = await fetch(`${API}/chat/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ messages: chatHistory })
+    });
+
+    const typing = document.getElementById("typingMsg");
+    if (typing) typing.remove();
+
+    if (res.ok) {
+      const data = await res.json();
+      chatHistory.push({ role: "assistant", content: data.reply });
+      appendChatMsg("assistant", data.reply);
+    }
+  }
+
+  function appendChatMsg(role, text, id) {
+    const container = document.getElementById("chatMessages");
+    const div = document.createElement("div");
+    div.className = `chat-msg ${role}`;
+    if (id) div.id = id;
+    div.innerHTML = formatMarkdown(text);
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function formatMarkdown(text) {
+    return text
+      .replace(/```(\w+)?\n?([\s\S]*?)```/g, '<pre>$2</pre>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^- (.+)/gm, '<li style="margin-left:16px;margin-bottom:4px">$1</li>')
+      .replace(/\n/g, '<br>');
+  }
+
+  loadAllReviews();
+</script>
+</body>
+</html>
